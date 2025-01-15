@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<title></title>
+	<base href="/">
+
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<link rel="icon" type="image/x-icon" href="favicon.ico">
+
+	<style>
+	#count{}
+	#word_search{}
+	</style>
+
+	<script>
+	function get_reduced(n)
+	{
+		var s = 0;
+		while (n)
+		{
+			s += n % 10;
+			n = Math.floor(n / 10);
+		}
+		if (s >= 10)
+		{
+			s = get_reduced(s);
+		}
+		return s;
+	}
+function generate()
+{
+	var count = document.getElementById('count');
+	var word_search = document.getElementById('word_search');
+	var max_count = document.getElementById('max_count');
+
+	var last_p = document.getElementById('last_p');
+	var parent_p = last_p.parentNode;
+	var p_alfa = document.createElement('p');
+	var p_simple = document.createElement('p');
+	var p_reduced = document.createElement('p');
+	parent_p.insertBefore(p_alfa, last_p);
+	parent_p.insertBefore(p_simple, last_p);
+	parent_p.insertBefore(p_reduced, last_p);
+
+	var a_code = 'А'.charCodeAt(0);
+	var ya_code = 'Я'.charCodeAt(0);
+	var e_code = 'Е'.charCodeAt(0);
+	var yo_code = 'Ё'.charCodeAt(0);
+	var a_ya_count = ya_code - a_code + 2;
+	var s = [];
+	var s_simple = [];
+	var s_reduced = [];
+	var i = 0;
+	for (var i_code = a_code; i_code <= ya_code; i_code++)
+	{
+		i++;
+		s.push(String.fromCharCode(i_code));
+		s_simple.push(i);
+		s_reduced.push(get_reduced(i));
+		if (i_code == e_code)
+		{
+			i++;
+			s.push(String.fromCharCode(yo_code));
+			s_simple.push(i);
+			s_reduced.push(get_reduced(i));
+		}
+	}
+	p_alfa.innerHTML = s.join(',');
+	p_simple.innerHTML = s_simple.join(',');
+	p_reduced.innerHTML = s_reduced.join(',');
+}
+
+function on_count()
+{
+	generate();
+}
+	</script>
+</head>
+<body>
+<label for="count" />
+<input id="count" type="text" value="33" />
+<label for="word_search" />
+<input id="word_search" type="text" value="test" />
+<label for="max_count" />
+<input id="max_count" type="text" value="100" />
+<input id="submit" type="submit" name="submit" value="Считать" onclick="on_count()" />
+<div id="test_output">
+<p id="last_p"></p>
+</div>
+</body>
+</html>
