@@ -32,17 +32,19 @@ function get_reduced(n)
 var s_alfa = [];
 var s_simple = [];
 var s_reduced = [];
+var s_simple_max = 1;
 
 var i_number = 1;
 var word_search = "";
 var max_count = 100;
 
 var theme_id = 1;
+var page_lang = 1;
 
 // Страница загружена
 document.addEventListener('DOMContentLoaded', function(){
 	theme_light();
-	generate();
+	select_lang(page_lang);
 });
 
 // Светлая тема
@@ -75,7 +77,7 @@ function select_theme()
 }
 
 // Создать массивы букв и чисел
-function generate()
+function generate_ru()
 {
 	var a_code = 'А'.charCodeAt(0);
 	var ya_code = 'Я'.charCodeAt(0);
@@ -83,6 +85,9 @@ function generate()
 	var yo_code = 'Ё'.charCodeAt(0);
 	var a_ya_count = ya_code - a_code + 2;
 	var i = 0;
+	s_alfa = [];
+	s_simple = [];
+	s_reduced = [];
 	for (var i_code = a_code; i_code <= ya_code; i_code++)
 	{
 		i++;
@@ -97,6 +102,27 @@ function generate()
 			s_reduced.push(get_reduced(i));
 		}
 	}
+	s_simple_max = s_simple[s_simple.length - 1];
+}
+
+// Создать массивы букв и чисел
+function generate_en()
+{
+	var a_code = 'A'.charCodeAt(0);
+	var z_code = 'Z'.charCodeAt(0);
+	var a_z_count = z_code - a_code + 2;
+	var i = 0;
+	s_alfa = [];
+	s_simple = [];
+	s_reduced = [];
+	for (var i_code = a_code; i_code <= z_code; i_code++)
+	{
+		i++;
+		s_alfa.push(String.fromCharCode(i_code));
+		s_simple.push(i);
+		s_reduced.push(get_reduced(i));
+	}
+	s_simple_max = s_simple[s_simple.length - 1];
 }
 
 // Очистить все строки
@@ -187,7 +213,7 @@ function for_alfa()
 			}
 		}
 	}
-	p.innerHTML = 'от А до ' + a_to_alfa(s_a);
+	p.innerHTML = 'от ' + s_alfa[0] + ' до ' + a_to_alfa(s_a);
 }
 
 // Проверить что в массиве a с элемента [index] содержится массив w
@@ -272,7 +298,7 @@ function inc_a_i(a, index)
 		a.push(0);
 	}
 	var i = a[index];
-	if (i < 33)
+	if (i < s_simple_max)
 	{
 		a[index]++;
 		return 0;
@@ -306,6 +332,35 @@ function show_help()
 	add_p('Max. - число вариантов расчета, чем больше, тем дольше считает.');
 }
 
+// Выбрать язык
+function select_lang(lang)
+{
+	if (lang == 1)
+	{
+		document.getElementById('button_lang').value = 'РУС';
+		generate_ru();
+	}
+	else
+	{
+		document.getElementById('button_lang').value = 'EN';
+		generate_en();
+	}
+}
+
+// Изменить язык
+function change_lang()
+{
+	if (page_lang == 1)
+	{
+		page_lang = 2;
+	}
+	else
+	{
+		page_lang = 1;
+	}
+	select_lang(page_lang);
+}
+
 // Нажатие кнопки Считать
 function on_count()
 {
@@ -318,6 +373,7 @@ function on_count()
 <div>
 <input id="button_theme" type="button" name="button_theme" value="Цвет страницы" onclick="select_theme()" />
 <input id="button_help" type="button" name="button_help" value="Справка" onclick="show_help()" />
+<input id="button_lang" type="button" name="button_lang" value="РУС" onclick="change_lang()" />
 </div>
 <div>
 <label for="i_number">Число</label>
