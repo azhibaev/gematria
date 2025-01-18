@@ -12,6 +12,8 @@
 	</style>
 
 	<script>
+// Посчитать reduced
+// Return: число
 function get_reduced(n)
 {
 	var s = 0;
@@ -35,10 +37,44 @@ var i_number = 1;
 var word_search = "";
 var max_count = 100;
 
+var theme_id = 1;
+
+// Страница загружена
 document.addEventListener('DOMContentLoaded', function(){
+	theme_light();
 	generate();
 });
 
+// Светлая тема
+function theme_light()
+{
+	document.body.style.backgroundColor = '#d0d0d0';
+	document.body.style.color = '#000000';
+	theme_id = 1;
+}
+
+// Темная тема
+function theme_dark()
+{
+	document.body.style.backgroundColor = '#000000';
+	document.body.style.color = '#f0f0f0';
+	theme_id = 2;
+}
+
+// Выбор цвета страницы
+function select_theme()
+{
+	if (theme_id == 1)
+	{
+		theme_dark();
+	}
+	else
+	{
+		theme_light();
+	}
+}
+
+// Создать массивы букв и чисел
 function generate()
 {
 	var a_code = 'А'.charCodeAt(0);
@@ -63,12 +99,14 @@ function generate()
 	}
 }
 
+// Очистить все строки
 function clear_all_p()
 {
 	var parent_p = document.getElementById('test_output');
 	parent_p.innerHTML = '<p id="last_p"></p>';
 }
 
+// Добавить строку на страницу
 function add_p(text)
 {
 	var last_p = document.getElementById('last_p');
@@ -76,13 +114,34 @@ function add_p(text)
 	var p = document.createElement('p');
 	parent_p.insertBefore(p, last_p);
 	p.innerHTML = text;
+	return p;
 }
 
+// Создать массив чисел из слова
+function word_to_a(text)
+{
+	var a = [];
+	var a_w = text.toUpperCase().split('').reverse();
+	var index = 0;
+	for (var i = 0; i < a_w.length; i++)
+	{
+		index = s_alfa.indexOf(a_w[i]);
+		if (index >= 0)
+		{
+			a.push(s_simple[index]);
+		}
+	}
+
+	return a;
+}
+
+// Расчет слов
 function for_alfa()
 {
 	i_number = parseInt(document.getElementById('i_number').value);
 	word_search = document.getElementById('word_search').value;
 	max_count = parseInt(document.getElementById('max_count').value);
+	var p_n = 0;
 
 	if (max_count > 1000000)
 	{
@@ -99,38 +158,113 @@ function for_alfa()
 
 	var s_a = [];
 	var i_sum = i_number;
+	var s_w = word_to_a(word_search);
+	var p = add_p('');
 	for (var i = 0; i < max_count; i++)
 	{
 		inc_a(s_a);
 		if (check_a_i(s_a, i_sum))
 		{
-			add_p(a_to_alfa(s_a));
+			if (s_w.length > 0)
+			{
+				if (check_a_w(s_a, s_w))
+				{
+					add_p(a_to_alfa(s_a));
+					p_n++;
+				}
+			}
+			else
+			{
+				if (p_n < 10000)
+				{
+					add_p(a_to_alfa(s_a));
+					p_n++;
+				}
+				else
+				{
+					break;
+				}
+			}
 		}
 	}
+	p.innerHTML = 'от А до ' + a_to_alfa(s_a);
 }
 
-function check_a_i(a, i)
+// Проверить что в массиве a с элемента [index] содержится массив w
+// Return:
+// 1: да
+// 0: нет
+function check_a_w_index(a, w, index)
+{
+	if (index >= 0)
+	{
+		if (a.length >= w.length + index)
+		{
+			for (var i = 0; i < w.length; i++)
+			{
+				if (a[i + index] != w[i])
+				{
+					return 0;
+				}
+			}
+			return 1;
+		}
+	}
+	return 0;
+}
+
+// Проверить что в массиве a содержится массив w
+// Return:
+// 1: да
+// 0: нет
+function check_a_w(a, w)
+{
+	for (var i = 0; i < a.length; i++)
+	{
+		if (a[i] == w[0])
+		{
+			if (check_a_w_index(a, w, i))
+			{
+				return 1;
+			}
+		}
+	}
+	return 0;
+}
+
+// Проверить что reduced a = v
+// Return:
+// 1: да
+// 0: нет
+function check_a_i(a, v)
 {
 	var s = 0;
-	a.forEach(function(item) {
-			s += get_reduced(item);
-			});
-	if (i == s)
+	for (var i = 0; i < a.length; i++)
+	{
+		s += get_reduced(a[i]);
+	}
+	if (v == s)
 	{
 		return 1;
 	}
 	return 0;
 }
 
+// Создать строку из массива чисел
 function a_to_alfa(a)
 {
 	var s = '';
-	a.forEach(function(item) {
-			s = s_alfa[item - 1] + s;
-			});
+	for (var i = 0; i < a.length; i++)
+	{
+		s = s_alfa[a[i] - 1] + s;
+	}
 	return s;
 }
 
+// Увеличить на 1 элемент [index] массива a
+// Return:
+// 0: элемент увеличен на 1
+// 1: элемент равен 1
 function inc_a_i(a, index)
 {
 	if (a.length <= index)
@@ -150,6 +284,10 @@ function inc_a_i(a, index)
 	return 1;
 }
 
+// Увеличить на 1 первый элемент массива
+// если элемент достиг максимального значения,
+//   то присвоить элементу первоначальное значение
+//   и увеличить следующий элемент
 function inc_a(a)
 {
 	var i = 0;
@@ -159,6 +297,16 @@ function inc_a(a)
 	}
 }
 
+// Показать справку
+function show_help()
+{
+	clear_all_p();
+	add_p('Число - сумма числовых значений букв слова.');
+	add_p('Слово - фильтр результатов по слову. Если нет слова, то выводятся все результаты, но не больше 10000 на странице.');
+	add_p('Max. - число вариантов расчета, чем больше, тем дольше считает.');
+}
+
+// Нажатие кнопки Считать
 function on_count()
 {
 	clear_all_p();
@@ -167,13 +315,25 @@ function on_count()
 	</script>
 </head>
 <body>
+<div>
+<input id="button_theme" type="button" name="button_theme" value="Цвет страницы" onclick="select_theme()" />
+<input id="button_help" type="button" name="button_help" value="Справка" onclick="show_help()" />
+</div>
+<div>
 <label for="i_number">Число</label>
 <input id="i_number" type="text" value="3" />
+</div>
+<div>
 <label for="word_search">Слово</label>
-<input id="word_search" type="text" value="test" />
+<input id="word_search" type="text" value="аб" />
+</div>
+<div>
 <label for="max_count">Max.</label>
 <input id="max_count" type="text" value="1000" />
+</div>
+<div>
 <input id="submit" type="submit" name="submit" value="Считать" onclick="on_count()" />
+</div>
 <div id="test_output">
 <p id="last_p"></p>
 </div>
